@@ -1,149 +1,131 @@
 /* ============================================================
    GLOBAL SCRIPT FILE
-   Used across all pages (index.html, blog.html, etc.)
-   Author: Nelis Munene Website
+   Used across all pages
 ============================================================ */
 
-/* ============================================================
-   1. FOOTER YEAR (AUTO-UPDATE)
-   Keeps copyright year current
-============================================================ */
-(function updateFooterYear() {
+document.addEventListener("DOMContentLoaded", () => {
+    updateFooterYear();
+    initializeAccordions();
+    initializeSmoothScroll();
+    initializeForms();
+    initializeWhatsAppButton();
+    initializeSamplePreviewButtons();
+    initializeSampleFilters();
+});
+
+function updateFooterYear() {
     const yearElement = document.getElementById("year");
+
     if (yearElement) {
         yearElement.textContent = new Date().getFullYear();
     }
-})();
+}
 
-/* ============================================================
-   2. FAQ ACCORDION (HOME PAGE)
-   Handles expandable FAQ items safely
-============================================================ */
-(function accordionHandler() {
-    const accordionHeaders = document.querySelectorAll(".accordion-header");
+function initializeAccordions() {
+    const accordionItems = Array.from(document.querySelectorAll(".accordion-item"));
 
-    // Exit gracefully if no accordion exists on the page
-    if (!accordionHeaders.length) return;
+    if (!accordionItems.length) {
+        return;
+    }
 
-    accordionHeaders.forEach(header => {
+    accordionItems.forEach(item => {
+        const header = item.querySelector(".accordion-header");
+
+        if (!header) {
+            return;
+        }
+
         header.addEventListener("click", () => {
-            const content = header.nextElementSibling;
+            const isActive = item.classList.contains("active");
 
-            // Close all other accordion items
-            accordionHeaders.forEach(otherHeader => {
-                if (otherHeader !== header) {
-                    otherHeader.classList.remove("active");
-                    otherHeader.nextElementSibling.style.display = "none";
+            accordionItems.forEach(otherItem => {
+                otherItem.classList.remove("active");
+                const otherHeader = otherItem.querySelector(".accordion-header");
+
+                if (otherHeader) {
+                    otherHeader.setAttribute("aria-expanded", "false");
                 }
             });
 
-            // Toggle current accordion item
-            header.classList.toggle("active");
-
-            if (content.style.display === "block") {
-                content.style.display = "none";
-            } else {
-                content.style.display = "block";
+            if (!isActive) {
+                item.classList.add("active");
+                header.setAttribute("aria-expanded", "true");
             }
         });
     });
-})();
+}
 
-/* ============================================================
-   3. SMOOTH SCROLL FOR INTERNAL LINKS (OPTIONAL ENHANCEMENT)
-   Improves UX for anchor-based navigation
-============================================================ */
-(function smoothScroll() {
+function initializeSmoothScroll() {
     const internalLinks = document.querySelectorAll('a[href^="#"]');
 
     internalLinks.forEach(link => {
         link.addEventListener("click", event => {
             const targetId = link.getAttribute("href");
+
+            if (!targetId || targetId === "#") {
+                return;
+            }
+
             const targetElement = document.querySelector(targetId);
 
             if (targetElement) {
                 event.preventDefault();
-                targetElement.scrollIntoView({
-                    behavior: "smooth"
-                });
+                targetElement.scrollIntoView({ behavior: "smooth" });
             }
         });
     });
-})();
+}
 
-/* ============================================================
-   4. BASIC FORM SUBMISSION HANDLING (FRONT-END ONLY)
-   Prevents page reload and provides UX feedback
-============================================================ */
-(function formHandler() {
+function initializeForms() {
     const forms = document.querySelectorAll("form");
-
-    if (!forms.length) return;
 
     forms.forEach(form => {
         form.addEventListener("submit", event => {
             event.preventDefault();
 
-            // Simple confirmation feedback (can be replaced with backend later)
             alert(
                 "Thank you for reaching out. Your message has been received, and I will respond promptly."
             );
 
-            // Reset form after submission
             form.reset();
         });
     });
-})();
+}
 
-/* ============================================================
-   CONTACT PAGE JAVASCRIPT
-   Handles WhatsApp redirection logic
-============================================================ */
-
-/* ============================================================
-   CONTACT PAGE WHATSAPP BUTTON LOGIC
-   Ensures valid WhatsApp URL with prefilled message
-============================================================ */
-(function whatsappHandler() {
+function initializeWhatsAppButton() {
     const whatsappInput = document.getElementById("whatsappNumber");
     const whatsappButton = document.querySelector(".whatsapp-btn");
 
-    if (!whatsappInput || !whatsappButton) return;
+    if (!whatsappInput || !whatsappButton) {
+        return;
+    }
 
     whatsappButton.addEventListener("click", event => {
         event.preventDefault();
 
         const userNumber = whatsappInput.value.trim();
-        if (userNumber === "") {
+
+        if (!userNumber) {
             alert("Please enter your WhatsApp number before proceeding.");
+            whatsappInput.focus();
             return;
         }
 
-        // Your WhatsApp number in international format WITHOUT '+'
         const businessNumber = "254704096155";
-
-        // Prefilled message
         const message = encodeURIComponent(
-            "Hello Nelis, I would like professional academic writing assistance. My WhatsApp number is: " + userNumber
+            `Hello Nelis, I would like professional academic writing assistance. My WhatsApp number is: ${userNumber}`
         );
 
-        // Construct valid WhatsApp URL
-        const whatsappURL = `https://wa.me/${businessNumber}?text=${message}`;
-
-        window.open(whatsappURL, "_blank");
+        window.open(`https://wa.me/${businessNumber}?text=${message}`, "_blank", "noopener");
     });
-})();
+}
 
-
-/* ============================================================
-   SAMPLES PAGE JS
-   Handles Preview Button click
-============================================================ */
-
-(function samplePreviewHandler() {
+function initializeSamplePreviewButtons() {
     const previewButtons = document.querySelectorAll(".preview-btn");
 
-    if (!previewButtons.length) return;
+    if (!previewButtons.length) {
+        return;
+    }
 
     previewButtons.forEach(button => {
         button.addEventListener("click", event => {
@@ -154,41 +136,39 @@
             );
         });
     });
-})();
+}
 
-
-document.querySelectorAll(".preview-btn").forEach(btn => {
-    btn.addEventListener("click", function(e){
-        const href = this.getAttribute("href");
-        if(href === "#") {
-            e.preventDefault();
-            alert("Sample preview is restricted. Please request similar work via the 'Request Similar Work' button.");
-        }
-    });
-});
-
-
-
-
-
-
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-
+function initializeSampleFilters() {
     const grid = document.querySelector(".samples-grid");
+
     if (!grid) {
-        console.warn("samples-grid not found");
         return;
     }
 
     const cards = Array.from(grid.querySelectorAll(".sample-card"));
-
     const searchInput = document.getElementById("searchInput");
     const disciplineFilter = document.getElementById("disciplineFilter");
     const citationFilter = document.getElementById("citationFilter");
 
-    function safeLower(value) {
-        return (value || "").toString().toLowerCase().trim();
+    const safeLower = value => (value || "").toString().toLowerCase().trim();
+
+    function handleNoResults(count) {
+        let noResults = grid.querySelector(".no-results");
+
+        if (count === 0) {
+            if (!noResults) {
+                noResults = document.createElement("div");
+                noResults.className = "no-results";
+                noResults.textContent = "No samples found matching your criteria.";
+                grid.appendChild(noResults);
+            }
+
+            return;
+        }
+
+        if (noResults) {
+            noResults.remove();
+        }
     }
 
     function filterSamples() {
@@ -212,37 +192,21 @@ document.addEventListener("DOMContentLoaded", function () {
                 textContent.includes(searchValue);
 
             const matchesDiscipline =
-                !disciplineValue || card.dataset.discipline === disciplineValue;
+                !disciplineValue || discipline === safeLower(disciplineValue);
 
             const matchesCitation =
-                !citationValue || card.dataset.citation === citationValue;
+                !citationValue || citation === safeLower(citationValue);
 
             const shouldShow = matchesSearch && matchesDiscipline && matchesCitation;
 
+            card.classList.toggle("is-hidden", !shouldShow);
+
             if (shouldShow) {
-                card.classList.remove("is-hidden");
-                visibleCount++;
-            } else {
-                card.classList.add("is-hidden");
+                visibleCount += 1;
             }
         });
 
         handleNoResults(visibleCount);
-    }
-
-    function handleNoResults(count) {
-        let noResults = grid.querySelector(".no-results");
-
-        if (count === 0) {
-            if (!noResults) {
-                noResults = document.createElement("div");
-                noResults.className = "no-results";
-                noResults.textContent = "No samples found matching your criteria.";
-                grid.appendChild(noResults);
-            }
-        } else if (noResults) {
-            noResults.remove();
-        }
     }
 
     if (searchInput) {
@@ -257,7 +221,5 @@ document.addEventListener("DOMContentLoaded", function () {
         citationFilter.addEventListener("change", filterSamples);
     }
 
-});
-</script>
-
-
+    filterSamples();
+}
